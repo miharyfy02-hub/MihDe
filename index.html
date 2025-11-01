@@ -98,7 +98,7 @@ function addCondition(){
 
 function saveConditions(){
   const defaultReply = document.getElementById('defaultReply').value;
-  fetch('save_conditions.php', {
+  fetch('https://mih-de-99fd.vercel.app/save_conditions.php', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
