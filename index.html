@@ -6,13 +6,14 @@
 <style>
 body { font-family:sans-serif; max-width:800px; margin:auto; padding:20px; background:#f0f2f5; color:#333; }
 h2 { text-align:center; color:#4267B2; }
-input, button, select { margin:5px 0; padding:10px; width:100%; border-radius:8px; border:1px solid #ccc; }
+input, button, select { margin:5px 0; padding:10px; width:100%; border-radius:10px; border:1px solid #ccc; box-sizing:border-box;}
 button { background:#4267B2; color:white; border:none; cursor:pointer; transition:0.3s; }
 button:hover { background:#365899; }
-table { width:100%; border-collapse: collapse; margin-top:10px; background:white; border-radius:8px; overflow:hidden; }
+table { width:100%; border-collapse: collapse; margin-top:10px; background:white; border-radius:10px; overflow:hidden; }
 th, td { border:1px solid #ddd; padding:10px; text-align:left; }
 th { background:#4267B2; color:white; }
 #custom-section, #default-section, #page-section, #saveBtn { margin-top:15px; }
+.alert { padding:10px; margin-top:10px; border-radius:8px; background:#dff0d8; color:#3c763d; }
 </style>
 </head>
 <body>
@@ -44,12 +45,15 @@ th { background:#4267B2; color:white; }
 </div>
 
 <button id="saveBtn" style="display:none;" onclick="saveConditions()">Save</button>
+<div id="message" class="alert" style="display:none;"></div>
 
 <script>
 let accessToken = '';
 let pageId = '';
 let customConditions = [];
+let defaultReply = "Misaotra tamin'ny commentaire!";
 
+// Facebook Login
 function loginFacebook() {
   FB.login(response=>{
     if(response.authResponse){
@@ -59,6 +63,7 @@ function loginFacebook() {
   }, {scope:'pages_read_engagement,pages_manage_engagement'});
 }
 
+// Fetch pages
 function fetchPages(){
   FB.api('/me/accounts', response=>{
     const select = document.getElementById('pageSelect');
@@ -77,6 +82,7 @@ function fetchPages(){
   });
 }
 
+// Add custom condition
 function addCondition(){
   const keyword = document.getElementById('keyword').value;
   const reply = document.getElementById('reply').value;
@@ -94,29 +100,25 @@ function addCondition(){
     table.deleteRow(row.rowIndex);
   };
   actionCell.appendChild(btn);
+  document.getElementById('keyword').value='';
+  document.getElementById('reply').value='';
 }
 
+// Save conditions (frontend-only)
 function saveConditions(){
-  const defaultReply = document.getElementById('defaultReply').value;
-  fetch('https://mih-de-99fd.vercel.app/save_conditions', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      page_id: pageId,
-      default_reply: defaultReply,
-      custom_conditions: customConditions
-    })
-  })
-  .then(res=>res.json())
-  .then(data=>alert('Saved successfully!'));
+  defaultReply = document.getElementById('defaultReply').value || defaultReply;
+  document.getElementById('message').style.display='block';
+  document.getElementById('message').textContent = "Default reply and custom conditions updated!";
+  console.log({pageId, defaultReply, customConditions});
 }
+
 </script>
 
 <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
 <script>
 window.fbAsyncInit = function() {
   FB.init({
-    appId      : '736925425971159',
+    appId      : '736925425971159', // Apetraho ny App ID anao
     cookie     : true,
     xfbml      : true,
     version    : 'v17.0'
