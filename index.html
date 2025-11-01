@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FB Auto Reply Manager</title>
+<style>
+body { font-family:sans-serif; max-width:800px; margin:auto; padding:20px; background:#f0f2f5; color:#333; }
+h2 { text-align:center; color:#4267B2; }
+input, button, select { margin:5px 0; padding:10px; width:100%; border-radius:8px; border:1px solid #ccc; }
+button { background:#4267B2; color:white; border:none; cursor:pointer; transition:0.3s; }
+button:hover { background:#365899; }
+table { width:100%; border-collapse: collapse; margin-top:10px; background:white; border-radius:8px; overflow:hidden; }
+th, td { border:1px solid #ddd; padding:10px; text-align:left; }
+th { background:#4267B2; color:white; }
+#custom-section, #default-section, #page-section, #saveBtn { margin-top:15px; }
+</style>
+</head>
+<body>
+
+<h2>FB Auto Reply Manager</h2>
+
+<div id="fb-login">
+  <button onclick="loginFacebook()">Se Connecter avec Facebook</button>
+</div>
+
+<div id="page-section" style="display:none;">
+  <label for="pageSelect">Choisir la Page:</label>
+  <select id="pageSelect"></select>
+</div>
+
+<div id="default-section" style="display:none;">
+  <label for="defaultReply">Default Reply:</label>
+  <input type="text" id="defaultReply" placeholder="Misaotra tamin'ny commentaire!">
+</div>
+
+<div id="custom-section" style="display:none;">
+  <h3>Custom Conditions</h3>
+  <table id="customTable">
+    <tr><th>Keyword</th><th>Reply</th><th>Action</th></tr>
+  </table>
+  <input type="text" id="keyword" placeholder="Keyword">
+  <input type="text" id="reply" placeholder="Reply">
+  <button onclick="addCondition()">Add Condition</button>
+</div>
+
+<button id="saveBtn" style="display:none;" onclick="saveConditions()">Save</button>
+
+<script>
+let accessToken = '';
+let pageId = '';
+let customConditions = [];
+
+function loginFacebook() {
+  FB.login(response=>{
+    if(response.authResponse){
+      accessToken = response.authResponse.accessToken;
+      fetchPages();
+    }
+  }, {scope:'pages_read_engagement,pages_manage_engagement'});
+}
+
+function fetchPages(){
+  FB.api('/me/accounts', response=>{
+    const select = document.getElementById('pageSelect');
+    response.data.forEach(p=>{
+      const option = document.createElement('option');
+      option.value = p.id;
+      option.textContent = p.name;
+      select.appendChild(option);
+    });
+    document.getElementById('page-section').style.display='block';
+    document.getElementById('default-section').style.display='block';
+    document.getElementById('custom-section').style.display='block';
+    document.getElementById('saveBtn').style.display='block';
+    pageId = select.value;
+    select.addEventListener('change', e=>pageId=e.target.value);
+  });
+}
+
+function addCondition(){
+  const keyword = document.getElementById('keyword').value;
+  const reply = document.getElementById('reply').value;
+  if(!keyword || !reply) return;
+  customConditions.push({keyword, reply});
+  const table = document.getElementById('customTable');
+  const row = table.insertRow();
+  row.insertCell(0).textContent = keyword;
+  row.insertCell(1).textContent = reply;
+  const actionCell = row.insertCell(2);
+  const btn = document.createElement('button');
+  btn.textContent='Remove';
+  btn.onclick = ()=> { 
+    customConditions = customConditions.filter(c=>c.keyword!==keyword);
+    table.deleteRow(row.rowIndex);
+  };
+  actionCell.appendChild(btn);
+}
+
+function saveConditions(){
+  const defaultReply = document.getElementById('defaultReply').value;
+  fetch('save_conditions.php', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      page_id: pageId,
+      default_reply: defaultReply,
+      custom_conditions: customConditions
+    })
+  })
+  .then(res=>res.json())
+  .then(data=>alert('Saved successfully!'));
+}
+</script>
+
+<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+<script>
+window.fbAsyncInit = function() {
+  FB.init({
+    appId      : '736925425971159',
+    cookie     : true,
+    xfbml      : true,
+    version    : 'v17.0'
+  });
+};
+</script>
+
+</body>
+</html>
