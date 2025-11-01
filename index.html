@@ -59,6 +59,8 @@ function loginFacebook() {
     if(response.authResponse){
       accessToken = response.authResponse.accessToken;
       fetchPages();
+    } else {
+      alert('Facebook login canceled or failed.');
     }
   }, {scope:'pages_read_engagement,pages_manage_engagement'});
 }
@@ -66,26 +68,31 @@ function loginFacebook() {
 // Fetch pages
 function fetchPages(){
   FB.api('/me/accounts', response=>{
-    const select = document.getElementById('pageSelect');
-    response.data.forEach(p=>{
-      const option = document.createElement('option');
-      option.value = p.id;
-      option.textContent = p.name;
-      select.appendChild(option);
-    });
-    document.getElementById('page-section').style.display='block';
-    document.getElementById('default-section').style.display='block';
-    document.getElementById('custom-section').style.display='block';
-    document.getElementById('saveBtn').style.display='block';
-    pageId = select.value;
-    select.addEventListener('change', e=>pageId=e.target.value);
+    if(response && response.data){
+      const select = document.getElementById('pageSelect');
+      select.innerHTML = '';
+      response.data.forEach(p=>{
+        const option = document.createElement('option');
+        option.value = p.id;
+        option.textContent = p.name;
+        select.appendChild(option);
+      });
+      document.getElementById('page-section').style.display='block';
+      document.getElementById('default-section').style.display='block';
+      document.getElementById('custom-section').style.display='block';
+      document.getElementById('saveBtn').style.display='block';
+      pageId = select.value;
+      select.addEventListener('change', e=>pageId=e.target.value);
+    } else {
+      alert('Unable to fetch pages. Check permissions.');
+    }
   });
 }
 
 // Add custom condition
 function addCondition(){
-  const keyword = document.getElementById('keyword').value;
-  const reply = document.getElementById('reply').value;
+  const keyword = document.getElementById('keyword').value.trim();
+  const reply = document.getElementById('reply').value.trim();
   if(!keyword || !reply) return;
   customConditions.push({keyword, reply});
   const table = document.getElementById('customTable');
@@ -111,7 +118,6 @@ function saveConditions(){
   document.getElementById('message').textContent = "Default reply and custom conditions updated!";
   console.log({pageId, defaultReply, customConditions});
 }
-
 </script>
 
 <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
