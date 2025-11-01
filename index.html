@@ -4,16 +4,65 @@
 <meta charset="UTF-8">
 <title>FB Auto Reply Manager</title>
 <style>
-body { font-family:sans-serif; max-width:800px; margin:auto; padding:20px; background:#f0f2f5; color:#333; }
-h2 { text-align:center; color:#4267B2; }
-input, button, select { margin:5px 0; padding:10px; width:100%; border-radius:10px; border:1px solid #ccc; box-sizing:border-box;}
-button { background:#4267B2; color:white; border:none; cursor:pointer; transition:0.3s; }
-button:hover { background:#365899; }
-table { width:100%; border-collapse: collapse; margin-top:10px; background:white; border-radius:10px; overflow:hidden; }
-th, td { border:1px solid #ddd; padding:10px; text-align:left; }
-th { background:#4267B2; color:white; }
-#custom-section, #default-section, #page-section, #saveBtn { margin-top:15px; }
-.alert { padding:10px; margin-top:10px; border-radius:8px; background:#dff0d8; color:#3c763d; }
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 20px;
+    background: #f0f2f5;
+    color: #333;
+}
+h2 {
+    text-align: center;
+    color: #4267B2;
+    margin-bottom: 25px;
+}
+input, button, select {
+    margin: 8px 0;
+    padding: 10px;
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+button {
+    background: #4267B2;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+}
+button:hover {
+    background: #365899;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+th {
+    background: #4267B2;
+    color: white;
+}
+#custom-section, #default-section, #page-section, #saveBtn {
+    margin-top: 20px;
+}
+.alert {
+    padding: 10px;
+    margin-top: 15px;
+    border-radius: 8px;
+    background: #dff0d8;
+    color: #3c763d;
+    display: none;
+}
 </style>
 </head>
 <body>
@@ -45,7 +94,7 @@ th { background:#4267B2; color:white; }
 </div>
 
 <button id="saveBtn" style="display:none;" onclick="saveConditions()">Save</button>
-<div id="message" class="alert" style="display:none;"></div>
+<div id="message" class="alert"></div>
 
 <script>
 let accessToken = '';
@@ -53,7 +102,6 @@ let pageId = '';
 let customConditions = [];
 let defaultReply = "Misaotra tamin'ny commentaire!";
 
-// Facebook Login
 function loginFacebook() {
   FB.login(response=>{
     if(response.authResponse){
@@ -65,7 +113,6 @@ function loginFacebook() {
   }, {scope:'pages_read_engagement,pages_manage_engagement'});
 }
 
-// Fetch pages
 function fetchPages(){
   FB.api('/me/accounts', response=>{
     if(response && response.data){
@@ -89,7 +136,6 @@ function fetchPages(){
   });
 }
 
-// Add custom condition
 function addCondition(){
   const keyword = document.getElementById('keyword').value.trim();
   const reply = document.getElementById('reply').value.trim();
@@ -111,11 +157,11 @@ function addCondition(){
   document.getElementById('reply').value='';
 }
 
-// Save conditions (frontend-only)
 function saveConditions(){
   defaultReply = document.getElementById('defaultReply').value || defaultReply;
-  document.getElementById('message').style.display='block';
-  document.getElementById('message').textContent = "Default reply and custom conditions updated!";
+  const msg = document.getElementById('message');
+  msg.style.display='block';
+  msg.textContent = "Default reply and custom conditions updated!";
   console.log({pageId, defaultReply, customConditions});
 }
 </script>
